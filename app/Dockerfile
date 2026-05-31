@@ -10,4 +10,5 @@ COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 COPY src/ .
 RUN adduser --disabled-password --no-create-home appuser
 USER appuser
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# --reload for dev only, remove for production
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

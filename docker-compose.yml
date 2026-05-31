@@ -43,6 +43,8 @@ services:
     networks:
       - appnet
       - backend
+    volumes:
+      - ./app/src:/app
     depends_on:
       postgres:
         condition: service_healthy
