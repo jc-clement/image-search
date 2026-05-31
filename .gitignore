@@ -1,5 +1,2 @@
-# Postgres data volume
-data/
-
 # Docker secrets file
 .env
