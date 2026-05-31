@@ -1,6 +1,8 @@
 services:
   postgres:
     image: postgres:16
+    networks:
+      - backend
     environment:
       POSTGRES_DB: image_search
       POSTGRES_USER: image_search
@@ -9,9 +11,14 @@ services:
       - data_postgres:/var/lib/postgresql/data
   redis:
     image: redis:7
+    networks:
+      - backend
 
   nginx:
     image: nginx:alpine
+    networks:
+      - frontend
+      - appnet
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
@@ -19,6 +26,17 @@ services:
 
   app:
     build: ./app
+    networks:
+      - appnet
+      - backend
+
+networks:
+  frontend:
+    driver: bridge
+  appnet:
+    driver: bridge
+  backend:
+    driver: bridge
 
 volumes:
   data_postgres:
