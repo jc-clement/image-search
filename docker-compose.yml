@@ -4,8 +4,8 @@ services:
     networks:
       - backend
     environment:
-      POSTGRES_DB: image_search
-      POSTGRES_USER: image_search
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - data_postgres:/var/lib/postgresql/data
@@ -45,6 +45,11 @@ services:
       - backend
     volumes:
       - ./app/src:/app
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
