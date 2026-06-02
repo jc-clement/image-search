@@ -38,3 +38,22 @@ def init_db():
         exit(1)
     finally:
         pool.putconn(conn)
+
+def get_indexed_files():
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT filepath, filename FROM images"
+    try:
+        images_in_db = set()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        for row in rows:
+            filepath, filename = row
+            thisfile = os.path.join(filepath, filename)
+            images_in_db.add(thisfile)
+        return images_in_db
+    except psycopg2.Error as e:
+        print(f"Couldn't query DB: {e}")
+        exit(1)
+    finally:
+        pool.putconn(conn)
