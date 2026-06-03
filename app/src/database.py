@@ -57,3 +57,22 @@ def get_indexed_files():
         exit(1)
     finally:
         pool.putconn(conn)
+
+def save_image(filepath, filename, timestamp, lat, lng, tags, favourite):
+    conn = get_connection()
+    cursor = conn.cursor()
+    insert_statement = """
+    INSERT INTO images (filepath, filename, timestamp, lat, lng, tags, favourite)
+    VALUES (%s, %s, %s, %s, %s, %s, %s);
+    """
+
+    data = (filepath, filename, timestamp, lat, lng, tags, favourite)
+    try:
+        cursor.execute(insert_statement, data)
+        conn.commit()
+        print(f"Inserted {filename}")
+    except psycopg2.Error as e:
+        print(f"Failed for {data}")
+        conn.rollback()
+    finally:
+        pool.putconn(conn)

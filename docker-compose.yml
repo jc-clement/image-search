@@ -39,6 +39,7 @@ services:
         condition: service_started
 
   app:
+    user: "1001:1001"
     build: ./app
     networks:
       - appnet
