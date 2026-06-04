@@ -72,7 +72,37 @@ def save_image(filepath, filename, timestamp, lat, lng, tags, favourite):
         conn.commit()
         print(f"Inserted {filename}")
     except psycopg2.Error as e:
-        print(f"Failed for {data}")
+        print(f"Failed for {filename}: {e}")
         conn.rollback()
+    finally:
+        pool.putconn(conn)
+
+def get_images(timestamp, lat, lng, labels, orderby):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # if !None set ts, lt, lg, ll = WHERE timestamp...
+    # include ts etc in query if set
+    select_statement = f"SELECT image_id, filepath, filename, timestamp, lat, lng, tags from images ORDER BY {orderby}"
+    try:
+        cursor.execute(select_statement)
+        results = cursor.fetchall()
+        images = []
+        for row in results:
+            image_id, filepath, filename, timestamp, lat, lng, tags = row
+            images.append({
+                'image_id': image_id,
+                'filepath': filepath,
+                'filename': filename,
+                'timestamp': timestamp,
+                'lat': lat,
+                'lng': lng,
+                'tags': tags,
+                'thumb': f"{filepath}/.thumbs/{filename}",
+                'display': f"{filepath}/.display/{filename}"
+            })
+        return images
+    except psycopg2.Error as e:
+        print(f"DB query failed: {e}")
+        return []
     finally:
         pool.putconn(conn)

@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 from database import init_pool, init_db
+from fastapi.templating import Jinja2Templates
+from search import interpret_search
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -11,7 +13,9 @@ async def lifespan(app: FastAPI):
     # no shutdown cmds
 
 app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
-def root():
-    return {"status": "ok"}
+def index(request: Request):
+    images = interpret_search(None, None)
+    return templates.TemplateResponse(request=request, name="index.html", context={"images": images})

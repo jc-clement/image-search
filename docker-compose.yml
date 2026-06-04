@@ -32,6 +32,7 @@ services:
       - appnet
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ${IMAGE_PATH}:/images
     ports:
       - 80:80
     depends_on:

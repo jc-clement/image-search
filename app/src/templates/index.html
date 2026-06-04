@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>Image Search</title>
+<style>
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 4px;
+}
+.grid-item {
+	aspect-ratio: 1;
+	background: #7C7C7C;
+}
+.grid-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	image-orientation: from-image;
+}
+</style>
+</head>
+<body>
+<div class="grid">
+{% for image in images %}
+<div class="grid-item">
+	<img src="{{ image.thumb }}"></img>
+</div>
+{% endfor %}
+</div>
+</body>
+</html>

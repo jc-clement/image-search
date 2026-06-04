@@ -27,7 +27,13 @@ def get_exif(img_in):
         tag = TAGS.get(tag_id, tag_id)
         exif[tag] = value
 
-    #Get Exif separately
+    #DateTimeOriginal separately
+    exif_ifd = exif_raw.get_ifd(0x8769)
+    for tag_id, value in exif_ifd.items():
+        tag = TAGS.get(tag_id, tag_id)
+        exif[tag] = value
+
+    #Get GPS separately
     gps_ifd = exif_raw.get_ifd(0x8825)
     gps = {}
     for tag_id, value in gps_ifd.items():
@@ -50,15 +56,9 @@ def convert_to_decimal(value):
     return d + (m /60.0) + (s / 3600.0)
 
 def get_gps(exif):
-    gps_raw = exif.get('GPSInfo')
-    if not gps_raw:
+    gps = exif.get('GPSInfo')
+    if not gps:
         return None, None
-
-    gps = {}
-    for tag_id, value in gps_raw.items():
-        tag = GPSTAGS.get(tag_id, tag_id)
-        gps[tag] = value
-
     if 'GPSLatitude' not in gps or 'GPSLongitude' not in gps:
         return None, None
 
@@ -74,6 +74,7 @@ def get_gps(exif):
     return lat, lng
 
 def get_labels(img_in):
+    # API calls disabled while debugging timestamp
     with open(img_in, 'rb') as f:
         content = base64.b64encode(f.read()).decode('utf-8')
 
@@ -104,16 +105,18 @@ def create_thumb(dir, file):
     mk_thumb_dir = os.path.join(dir, thumb_dir)
     os.makedirs(mk_thumb_dir, exist_ok=True)
     img = Image.open(source)
+    exif = img.info.get('exif', b'')
     img.thumbnail((400, 400))
-    img.save(os.path.join(mk_thumb_dir, file))
+    img.save(os.path.join(mk_thumb_dir, file), exif=exif)
     print(f"Created thumb for {file}")
 
     display_dir = '.display'
     mk_disp_dir = os.path.join(dir, display_dir)
     os.makedirs(mk_disp_dir, exist_ok=True)
     img = Image.open(source)
+    exif = img.info.get('exif', b'')
     img.thumbnail((1200, 1200))
-    img.save(os.path.join(mk_disp_dir, file))
+    img.save(os.path.join(mk_disp_dir, file), exif=exif)
     print(f"Created websize for {file}")
 
 if __name__ == "__main__":
