@@ -98,7 +98,6 @@ def get_images(timestamp, lat, lng, labels, orderby):
     where = ""
     params = []
 
-
     if labels:
         where = "WHERE %s ILIKE ANY(tags)"
         params.append(labels[0])
