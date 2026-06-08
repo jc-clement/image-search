@@ -17,5 +17,9 @@ def interpret_search(search, order):
     # default - show newest first
     # if order is set update ORDER BY
 
+
+    if search:
+        labels = [search]
+
     images = get_images(timestamp, lat, lng, labels, orderby)
     return images

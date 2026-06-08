@@ -95,12 +95,22 @@ def save_image(filepath, filename, timestamp, lat, lng, tags, favourite):
 def get_images(timestamp, lat, lng, labels, orderby):
     conn = get_connection()
     cursor = conn.cursor()
-    # if !None set ts, lt, lg, ll = WHERE timestamp...
-    # include ts etc in query if set
-    select_statement = f"""SELECT image_id, filepath, filename, timestamp, lat, lng, tags
-    from images ORDER BY {orderby}"""
+    where = ""
+    params = []
+
+
+    if labels:
+        where = "WHERE %s ILIKE ANY(tags)"
+        params.append(labels[0])
+
+    select_statement = f"""
+        SELECT image_id, filepath, filename, timestamp, lat, lng, tags
+        FROM images
+        {where}
+        ORDER BY {orderby}
+    """
     try:
-        cursor.execute(select_statement)
+        cursor.execute(select_statement, params if params else None)
         results = cursor.fetchall()
         images = []
         for row in results:

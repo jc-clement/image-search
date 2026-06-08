@@ -61,13 +61,26 @@
 #lightbox-meta {
     color: white;
     font-family: sans-serif;
-    font-size: 0.9em;
+    font-size: 1em;
     text-align: center;
     padding: 8px;
+}
+form, form input, form button, form a {
+    font-family: sans-serif;
+    font-size: 1.2em;
+    text-align: center;
+    margin: 8px 0;
 }
 </style>
 </head>
 <body>
+<form action="/" method="get">
+    {% if request.query_params.get('q') %}
+    <a href="/">X</a>&nbsp;
+    {% endif %}
+    <input type="text" name="q" placeholder="Search images..." value="{{ request.query_params.get('q', '') }}">
+    <button type="submit">Go</button>
+</form>
 <div class="grid">
 {% for image in images %}
 <div class="grid-item"
