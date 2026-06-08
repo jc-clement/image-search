@@ -126,7 +126,9 @@ def get_images(timestamp, lat, lng, labels, orderby):
                 'thumb': f"{filepath}/.thumbs/{filename}",
                 'display': f"{filepath}/.display/{filename}"
             })
-        return images
+        cursor.execute("SELECT COUNT(*) FROM images")
+        total = cursor.fetchone()[0]
+        return images, total
     except psycopg2.Error as e:
         print(f"DB query failed: {e}")
         return []

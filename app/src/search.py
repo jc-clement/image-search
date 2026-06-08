@@ -21,5 +21,5 @@ def interpret_search(search, order):
     if search:
         labels = [search]
 
-    images = get_images(timestamp, lat, lng, labels, orderby)
-    return images
+    images, total = get_images(timestamp, lat, lng, labels, orderby)
+    return images, total

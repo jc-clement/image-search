@@ -19,5 +19,5 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 def index(request: Request, q: str = None):
-    images = interpret_search(q, None)
-    return templates.TemplateResponse(request=request, name="index.html", context={"images": images})
+    images, total = interpret_search(q, None)
+    return templates.TemplateResponse(request=request, name="index.html", context={"images": images, "total": total})

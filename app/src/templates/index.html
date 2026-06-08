@@ -80,6 +80,11 @@ form, form input, form button, form a {
     {% endif %}
     <input type="text" name="q" placeholder="Search images..." value="{{ request.query_params.get('q', '') }}">
     <button type="submit">Go</button>
+    {% if request.query_params.get('q') %}
+    	({{ images|length }} / {{ total }})
+    {% else %}
+	({{ total }} images)
+    {% endif %}
 </form>
 <div class="grid">
 {% for image in images %}
