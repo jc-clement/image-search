@@ -1,6 +1,5 @@
-import os
-from database import get_connection, pool, get_images
-from datetime import datetime
+from database import get_images
+
 
 def interpret_search(search, order):
     # Interpret search string

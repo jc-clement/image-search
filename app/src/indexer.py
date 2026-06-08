@@ -1,5 +1,5 @@
 import os
-from database import get_connection, pool, get_indexed_files, save_image
+from database import get_indexed_files, save_image
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from datetime import datetime
@@ -7,6 +7,7 @@ import requests
 import base64
 
 IMG_PATH = os.environ.get('IMAGE_PATH')
+
 
 def scan_images():
     results = set()
@@ -16,6 +17,7 @@ def scan_images():
             thisfile = os.path.join(root, filename)
             results.add(thisfile)
     return results
+
 
 def get_exif(img_in):
     img = Image.open(img_in)
@@ -27,13 +29,13 @@ def get_exif(img_in):
         tag = TAGS.get(tag_id, tag_id)
         exif[tag] = value
 
-    #DateTimeOriginal separately
+    # DateTimeOriginal separately
     exif_ifd = exif_raw.get_ifd(0x8769)
     for tag_id, value in exif_ifd.items():
         tag = TAGS.get(tag_id, tag_id)
         exif[tag] = value
 
-    #Get GPS separately
+    # Get GPS separately
     gps_ifd = exif_raw.get_ifd(0x8825)
     gps = {}
     for tag_id, value in gps_ifd.items():
@@ -43,17 +45,20 @@ def get_exif(img_in):
 
     return exif
 
+
 def get_timestamp(exif):
     timestamp = exif.get('DateTimeOriginal')
     if not timestamp:
         return None
     return datetime.strptime(timestamp, '%Y:%m:%d %H:%M:%S')
 
+
 def convert_to_decimal(value):
     d = float(value[0])
     m = float(value[1])
     s = float(value[2])
-    return d + (m /60.0) + (s / 3600.0)
+    return d + (m / 60.0) + (s / 3600.0)
+
 
 def get_gps(exif):
     gps = exif.get('GPSInfo')
@@ -66,12 +71,13 @@ def get_gps(exif):
     lat_ref = gps['GPSLatitudeRef']
     lng = convert_to_decimal(gps['GPSLongitude'])
     lng_ref = gps['GPSLongitudeRef']
-    
+
     if lat_ref != 'N':
         lat = -lat
     if lng_ref != 'E':
         lng = -lng
     return lat, lng
+
 
 def get_labels(img_in):
     # API calls disabled while debugging timestamp
@@ -98,6 +104,7 @@ def get_labels(img_in):
     # print(f"API response: {result}")
     return [label['description'] for label in annotations]
 
+
 def create_thumb(dir, file):
     source = os.path.join(dir, file)
 
@@ -119,6 +126,7 @@ def create_thumb(dir, file):
     img.save(os.path.join(mk_disp_dir, file), exif=exif)
     print(f"Created websize for {file}")
 
+
 if __name__ == "__main__":
     from database import init_pool
     init_pool()
@@ -129,7 +137,7 @@ if __name__ == "__main__":
     print(f"Images on disk: {len(on_disk)}")
     print(f"Images to index: {len(to_index)}")
 
-    #create thumbnails
+    # create thumbnails
     for thisimg in on_disk:
         filename = os.path.basename(thisimg)
         directory = os.path.dirname(thisimg)
@@ -137,12 +145,12 @@ if __name__ == "__main__":
         if not os.path.exists(thumb_path):
             create_thumb(directory, filename)
 
-    #index new images
+    # index new images
     for thisimg in to_index:
         filename = os.path.basename(thisimg)
         directory = os.path.dirname(thisimg)
         exif = get_exif(thisimg)
-        timestamp  = get_timestamp(exif)
+        timestamp = get_timestamp(exif)
         lat, lng = get_gps(exif)
         disp_img = os.path.join(directory, '.display', filename)
         tags = get_labels(disp_img)

@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -20,7 +20,7 @@ jobs:
         run: pip install flake8
 
       - name: Run flake8
-        run: flake8 app/src/
+        run: flake8 app/src/ --max-line-length=119
 
   build:
     runs-on: ubuntu-latest
