@@ -1,2 +1,3 @@
 # Docker secrets file
 .env
+vars/defaults.yml

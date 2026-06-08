@@ -1,0 +1,39 @@
+---
+- name: Image Search host setup
+  hosts: localhost
+  become: true
+  vars_files:
+    - vars/defaults.yml
+  roles:
+    - geerlingguy.docker
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+    - name: Add image-search config
+      template:
+        src: nginx/image-search-host.conf
+        dest: /etc/nginx/sites-available/image-search
+
+    - name: Enable image-search site
+      file:
+        src: /etc/nginx/sites-available/image-search
+        dest: /etc/nginx/sites-enabled/image-search
+        state: link
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Install certbot
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: latest
+
+    - name: Get SSL
+      command: "certbot --nginx -d {{ image_search_domain }} --non-interactive --agree-tos -m {{ image_search_email }} "

@@ -1,0 +1,3 @@
+# vars/defaults.yml
+image_search_domain: "you-domain.com"
+image_search_email: "your@email.com"
