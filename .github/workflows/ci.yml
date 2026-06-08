@@ -31,3 +31,10 @@ jobs:
 
       - name: Build Docker image
         run: docker compose build
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_HOST: ci
+          GOOGLE_VISION_API_KEY: ci
+          IMAGE_PATH: /tmp
