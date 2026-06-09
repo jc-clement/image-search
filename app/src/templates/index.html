@@ -112,7 +112,7 @@ form, form input, form button, form a {
     {% else %}
     <a href="/">Close labels</a><br/>
         {% for item in label_cloud %}
-	    <a href="/?q={{ item.label }}">{{ item.label }}</a> ({{ item.freq }})&nbsp; &nbsp;
+	    <a href="/?q=%22{{ item.label }}%22">{{ item.label }}</a> ({{ item.freq }})&nbsp; &nbsp;
 	{% endfor %}
     {% endif %}
 </div>

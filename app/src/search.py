@@ -11,8 +11,15 @@ def interpret_search(search, order):
     orderby = 'timestamp DESC'
 
     if search:
-        tokens = search.split()
+        # Quoted phrases first
+        quoted = re.findall(r'"([^"]+)"', search)
+        # Remove quoted from search string
+        remaining = re.sub(r'"[^"]+"', '', search).strip()
+        tokens = remaining.split() if remaining else []
         label_tokens = []
+        # Quoted straight to labels
+        for phrase in quoted:
+            label_tokens.append(phrase)
         for token in tokens:
             if re.match(r'^-?\d+\.\d+,-?\d+\.\d+$', token):
                 parts = token.split(',')
