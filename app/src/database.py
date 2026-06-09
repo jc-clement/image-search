@@ -92,15 +92,33 @@ def save_image(filepath, filename, timestamp, lat, lng, tags, favourite):
         pool.putconn(conn)
 
 
-def get_images(timestamp, lat, lng, labels, orderby):
+def get_images(year, month, day, lat, lng, labels, orderby):
     conn = get_connection()
     cursor = conn.cursor()
-    where = ""
     params = []
+    conditions = []
 
     if labels:
-        where = "WHERE %s ILIKE ANY(tags)"
-        params.append(labels[0])
+        for label in labels:
+            conditions.append("%s ILIKE ANY(tags)")
+            params.append(label)
+
+    if year:
+        conditions.append("EXTRACT(year FROM timestamp) = %s")
+        params.append(year)
+
+    if month:
+        conditions.append("EXTRACT(month FROM timestamp) = %s")
+        params.append(month)
+
+    if day:
+        conditions.append("EXTRACT(day FROM timestamp) = %s")
+        params.append(day)
+
+    if conditions:
+        where = "WHERE " + " AND ".join(conditions)
+    else:
+        where = ""
 
     select_statement = f"""
         SELECT image_id, filepath, filename, timestamp, lat, lng, tags

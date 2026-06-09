@@ -1,24 +1,34 @@
 from database import get_images
+import re
 
 
 def interpret_search(search, order):
     # Interpret search string
 
-    timestamp = None
-    # - Create timestamp range if included
-
+    year, month, day = None, None, None
     lat, lng = None, None
-    # - Create lat/lng range if included
-
     labels = None
-    # - Create label search terms if included
-
-    orderby = 'timestamp desc'
-    # default - show newest first
-    # if order is set update ORDER BY
+    orderby = 'timestamp DESC'
 
     if search:
-        labels = [search]
+        tokens = search.split()
+        label_tokens = []
+        for token in tokens:
+            if re.match(r'^\d{4}-\d{2}-\d{2}$', token):
+                parts = token.split('-')
+                year = int(parts[0])
+                month = int(parts[1])
+                day = int(parts[2])
+            elif re.match(r'^\d{4}-\d{2}$', token):
+                parts = token.split('-')
+                year = int(parts[0])
+                month = int(parts[1])
+            elif re.match(r'^\d{4}$', token):
+                year = int(token)
+            else:
+                label_tokens.append(token)
+        if label_tokens:
+            labels = label_tokens
 
-    images, total = get_images(timestamp, lat, lng, labels, orderby)
+    images, total = get_images(year, month, day, lat, lng, labels, orderby)
     return images, total
