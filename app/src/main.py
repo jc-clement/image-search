@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-from database import init_pool, init_db
+from database import init_pool, init_db, get_labels_cloud
 from fastapi.templating import Jinja2Templates
 from search import interpret_search
 
@@ -18,6 +18,11 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-def index(request: Request, q: str = None):
+def index(request: Request, q: str = None, show_cloud: str = None):
     images, total = interpret_search(q, None)
-    return templates.TemplateResponse(request=request, name="index.html", context={"images": images, "total": total})
+    label_cloud = get_labels_cloud()
+    return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={"images": images, "total": total, "label_cloud": label_cloud}
+    )

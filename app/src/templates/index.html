@@ -29,6 +29,19 @@
 	object-fit: contain;
 	image-orientation: from-image;
 }
+.labels {
+	text-align: center;
+	padding: 8px;
+	line-height: 2em;
+	font-family: sans-serif;
+	font-size: 1.3em;
+}
+.labels a {
+	margin: 2px 4px;
+	font-family: sans-serif;
+	font-size: 1.3em;
+	text-decoration: none;
+}
 #lightbox {
     position: fixed;
     top: 0;
@@ -86,6 +99,18 @@ form, form input, form button, form a {
 	({{ total }} images)
     {% endif %}
 </form>
+{% if not request.query_params.get('q') %}
+<div class="labels">
+    {% if not request.query_params.get('show_cloud') %}
+        <a href="/?show_cloud=1">Browse labels</a>
+    {% else %}
+    <a href="/">Close labels</a><br/>
+        {% for item in label_cloud %}
+	    <a href="/?q={{ item.label }}">{{ item.label }}</a> ({{ item.freq }})&nbsp; &nbsp;
+	{% endfor %}
+    {% endif %}
+</div>
+{% endif %}
 <div class="grid">
 {% for image in images %}
 <div class="grid-item"

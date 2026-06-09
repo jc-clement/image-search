@@ -133,3 +133,29 @@ def get_images(timestamp, lat, lng, labels, orderby):
         return []
     finally:
         pool.putconn(conn)
+
+
+def get_labels_cloud():
+    conn = get_connection()
+    cursor = conn.cursor()
+    select_statement = """SELECT unnest(tags) as label, COUNT(*) as freq
+        FROM images
+        GROUP BY label
+        ORDER BY freq DESC
+    """
+    try:
+        cursor.execute(select_statement)
+        results = cursor.fetchall()
+        labs = []
+        for row in results:
+            label, freq = row
+            labs.append({
+                'label': label,
+                'freq': freq
+            })
+        return labs
+    except psycopg2.Error as e:
+        print(f"DB query failed: {e}")
+        return []
+    finally:
+        pool.putconn(conn)
