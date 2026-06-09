@@ -2,6 +2,16 @@
 <head>
 <title>Image Search</title>
 <style>
+body {
+	background: #999999;
+	font-family: sans-serif;
+	font-size: 1.3em;
+	color: white;
+}
+a {
+	color: yellow;
+	text-decoration: none;
+}
 .grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -17,9 +27,6 @@
 	bottom: 0;
 	width: 100%;
 	text-align: center;
-	font-family: sans-serif;
-	font-size: 1em;
-	color: white;
 	background: rgba(0,0,0,0.3);
 	padding: 2px 0;
 }
@@ -33,14 +40,9 @@
 	text-align: center;
 	padding: 8px;
 	line-height: 2em;
-	font-family: sans-serif;
-	font-size: 1.3em;
 }
 .labels a {
 	margin: 2px 4px;
-	font-family: sans-serif;
-	font-size: 1.3em;
-	text-decoration: none;
 }
 #lightbox {
     position: fixed;
@@ -72,15 +74,12 @@
 }
 
 #lightbox-meta {
-    color: white;
-    font-family: sans-serif;
-    font-size: 1em;
     text-align: center;
     padding: 8px;
 }
 form, form input, form button, form a {
     font-family: sans-serif;
-    font-size: 1.2em;
+    font-size: 1.3em;
     text-align: center;
     margin: 8px 0;
 }
@@ -122,6 +121,9 @@ form, form input, form button, form a {
 <div class="grid-item"
 	data-display="{{ image.display }}"
 	data-timestamp="{{ image.timestamp or '' }}"
+	data-year="{{ image.timestamp.year if image.timestamp else '' }}"
+	data-month="{{ image.timestamp.month if image.timestamp else '' }}"
+	data-day="{{ image.timestamp.day if image.timestamp else '' }}"
 	data-lat="{{ image.lat or '' }}"
 	data-lng="{{ image.lng or '' }}"
 	data-tags="{{ image.tags | join(',') if image.tags else '' }}">
@@ -137,6 +139,7 @@ form, form input, form button, form a {
 			<span id="lightbox-date"></span><br/>
 			<span id="lightbox-location"></span>
 		</div>
+		<div id="lightbox-links"></div>
 	</div>
 </div>
 <script>
@@ -151,6 +154,19 @@ document.querySelectorAll('.grid-item').forEach(item => {
         document.getElementById('lightbox-img').src = display;
         document.getElementById('lightbox-date').textContent = timestamp;
         document.getElementById('lightbox-location').textContent = lat && lng ? lat + ', ' + lng : '';
+	const links = [];
+	if (timestamp) {
+		const year = this.dataset.year;
+		const month = this.dataset.month;
+		const day = this.dataset.day;
+		links.push(`<a href="/?q=${year}">Same year</a>`);
+		links.push(`<a href="/?q=${year}-${String(month).padStart(2,'0')}">Same month</a>`);
+		links.push(`<a href="/?q=${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}">Same day</a>`);
+	}
+	if (lat && lng) {
+		links.push(`<a href="/?q=${lat},${lng}">Images near here</a>`);
+	}
+	document.getElementById('lightbox-links').innerHTML = links.join(' | ');
 
         document.getElementById('lightbox').style.display = 'flex';
     });
