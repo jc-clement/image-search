@@ -50,6 +50,10 @@ Initial build is for my GitHub portfolio, which is supported by a tiny VPS, so..
 
 For portfolio purposes the sample set of images have been chosen to exclude any private images so no authentication is required. If my live version of this image search is ever made available on the internet it will be behind basic auth through Nginx.
 
+### Location search
+
+Returns images within 5 miles of supplied co-ords, or the nearest 20 if none within 5 miles.
+
 ## Status
 
 In Development.

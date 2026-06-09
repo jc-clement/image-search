@@ -91,7 +91,8 @@ form, form input, form button, form a {
 		<summary>Tips</summary>
 		<p>Labels: castle, red mushroom, beach</p>
 		<p>Date: 2025 or 2025-06 or 2025-06-21</p>
-		<p>Combined: castle 2025-06</p>
+		<p>Location: 54.2545,-0.9845 (within 5mi, or show nearest)</p>
+		<p>Combined: castle 2025-06 54.2545,-0.9845</p>
 	</details>
     {% if request.query_params.get('q') %}
     <a href="/">X</a>&nbsp;
@@ -128,7 +129,10 @@ form, form input, form button, form a {
 	data-lng="{{ image.lng or '' }}"
 	data-tags="{{ image.tags | join(',') if image.tags else '' }}">
 	<img src="{{ image.thumb }}"></img>
-	<div class="date">{{ image.timestamp.strftime('%Y-%m-%d') if image.timestamp else '' }}</div>
+	<div class="date">
+		{{ image.timestamp.strftime('%Y-%m-%d') if image.timestamp else '' }}
+		{% if image.distance %}| {{ image.distance }}{% endif %}
+	</div>
 </div>
 {% endfor %}
 </div>

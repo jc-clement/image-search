@@ -92,11 +92,22 @@ def save_image(filepath, filename, timestamp, lat, lng, tags, favourite):
         pool.putconn(conn)
 
 
+def format_distance(metres):
+    if metres is None:
+        return ''
+    if metres > 1609:
+        return f"{round(metres / 1609, 2)}mi"
+    return f"{round(metres)}m"
+
+
 def get_images(year, month, day, lat, lng, labels, orderby):
     conn = get_connection()
     cursor = conn.cursor()
     params = []
     conditions = []
+    haversine = """(6371000 * acos(cos(radians(%s)) * cos(radians(lat)) *
+    cos(radians(lng) - radians(%s)) +
+    sin(radians(%s)) * sin(radians(lat))))"""
 
     if labels:
         for label in labels:
@@ -114,6 +125,54 @@ def get_images(year, month, day, lat, lng, labels, orderby):
     if day:
         conditions.append("EXTRACT(day FROM timestamp) = %s")
         params.append(day)
+
+    if lat and lng:
+        count_conditions = conditions.copy()
+        count_params = params.copy()
+        count_conditions.append(f"{haversine} < 8045")
+        count_params.extend([lat, lng, lat])
+        count_where = "WHERE " + " AND ".join(count_conditions) if count_conditions else f"WHERE {haversine} < 8045"
+        cursor.execute(f"SELECT COUNT(*) FROM images {count_where}", count_params)
+        nearby_count = cursor.fetchone()[0]
+        if nearby_count > 0:
+            conditions.append(f"{haversine} < 8045")
+            params.extend([lat, lng, lat])
+        else:
+            select_statement = f"""
+                SELECT image_id, filepath, filename, timestamp, lat, lng, tags,
+                    {haversine} AS distance
+                FROM images
+                WHERE lat IS NOT NULL
+                ORDER BY distance ASC
+                LIMIT 20
+            """
+            params.extend([lat, lng, lat])
+            try:
+                cursor.execute(select_statement, params)
+                results = cursor.fetchall()
+                images = []
+                for row in results:
+                    image_id, filepath, filename, timestamp, rlat, rlng, tags, dist = row
+                    images.append({
+                        'image_id': image_id,
+                        'filepath': filepath,
+                        'filename': filename,
+                        'timestamp': timestamp,
+                        'lat': rlat,
+                        'lng': rlng,
+                        'tags': tags,
+                        'thumb': f"{filepath}/.thumbs/{filename}",
+                        'display': f"{filepath}/.display/{filename}",
+                        'distance': format_distance(dist)
+                    })
+                cursor.execute("SELECT COUNT(*) FROM images")
+                total = cursor.fetchone()[0]
+                return images, total
+            except psycopg2.Error as e:
+                print(f"DB query failed: {e}")
+                return [], 0
+            finally:
+                pool.putconn(conn)
 
     if conditions:
         where = "WHERE " + " AND ".join(conditions)
@@ -141,7 +200,8 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                 'lng': lng,
                 'tags': tags,
                 'thumb': f"{filepath}/.thumbs/{filename}",
-                'display': f"{filepath}/.display/{filename}"
+                'display': f"{filepath}/.display/{filename}",
+                'distance': ''
             })
         cursor.execute("SELECT COUNT(*) FROM images")
         total = cursor.fetchone()[0]

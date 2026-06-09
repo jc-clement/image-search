@@ -14,7 +14,11 @@ def interpret_search(search, order):
         tokens = search.split()
         label_tokens = []
         for token in tokens:
-            if re.match(r'^\d{4}-\d{2}-\d{2}$', token):
+            if re.match(r'^-?\d+\.\d+,-?\d+\.\d+$', token):
+                parts = token.split(',')
+                lat = float(parts[0])
+                lng = float(parts[1])
+            elif re.match(r'^\d{4}-\d{2}-\d{2}$', token):
                 parts = token.split('-')
                 year = int(parts[0])
                 month = int(parts[1])
