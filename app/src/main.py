@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-from database import init_pool, init_db, get_labels_cloud
+from database import init_pool, init_db, get_labels_cloud, toggle_fav
 from fastapi.templating import Jinja2Templates
 from search import interpret_search
 
@@ -26,3 +26,9 @@ def index(request: Request, q: str = None, show_cloud: str = None):
             name="index.html",
             context={"images": images, "total": total, "label_cloud": label_cloud}
     )
+
+
+@app.post("/favourite/{image_id}")
+def favourite(image_id: int):
+    toggle_fav(image_id)
+    return {"status": "ok"}

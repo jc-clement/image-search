@@ -139,7 +139,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
             params.extend([lat, lng, lat])
         else:
             select_statement = f"""
-                SELECT image_id, filepath, filename, timestamp, lat, lng, tags,
+                SELECT image_id, filepath, filename, timestamp, lat, lng, tags, favourite,
                     {haversine} AS distance
                 FROM images
                 WHERE lat IS NOT NULL
@@ -152,7 +152,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                 results = cursor.fetchall()
                 images = []
                 for row in results:
-                    image_id, filepath, filename, timestamp, rlat, rlng, tags, dist = row
+                    image_id, filepath, filename, timestamp, rlat, rlng, tags, favourite, dist = row
                     images.append({
                         'image_id': image_id,
                         'filepath': filepath,
@@ -161,6 +161,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                         'lat': rlat,
                         'lng': rlng,
                         'tags': tags,
+                        'favourite': favourite,
                         'thumb': f"{filepath}/.thumbs/{filename}",
                         'display': f"{filepath}/.display/{filename}",
                         'distance': format_distance(dist)
@@ -180,7 +181,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
         where = ""
 
     select_statement = f"""
-        SELECT image_id, filepath, filename, timestamp, lat, lng, tags
+        SELECT image_id, filepath, filename, timestamp, lat, lng, tags, favourite
         FROM images
         {where}
         ORDER BY {orderby}
@@ -190,7 +191,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
         results = cursor.fetchall()
         images = []
         for row in results:
-            image_id, filepath, filename, timestamp, lat, lng, tags = row
+            image_id, filepath, filename, timestamp, lat, lng, tags, favourite = row
             images.append({
                 'image_id': image_id,
                 'filepath': filepath,
@@ -199,6 +200,7 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                 'lat': lat,
                 'lng': lng,
                 'tags': tags,
+                'favourite': favourite,
                 'thumb': f"{filepath}/.thumbs/{filename}",
                 'display': f"{filepath}/.display/{filename}",
                 'distance': ''
@@ -235,5 +237,19 @@ def get_labels_cloud():
     except psycopg2.Error as e:
         print(f"DB query failed: {e}")
         return []
+    finally:
+        pool.putconn(conn)
+
+
+def toggle_fav(image_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    update_statement = "UPDATE images SET favourite = NOT favourite WHERE image_id = %s"
+    try:
+        cursor.execute(update_statement, (image_id,))
+        conn.commit()
+    except psycopg2.Error as e:
+        print(f"Failed to toggle favourite for {image_id}: {e}")
+        conn.rollback()
     finally:
         pool.putconn(conn)

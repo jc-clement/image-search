@@ -83,6 +83,14 @@ form, form input, form button, form a {
     text-align: center;
     margin: 8px 0;
 }
+.fav {
+    position: absolute;
+    top: 0px;
+    right: 12px;
+    font-size: 2.5em;
+    cursor: pointer;
+    text-shadow: 0 0 3px black;
+}
 </style>
 </head>
 <body>
@@ -129,6 +137,9 @@ form, form input, form button, form a {
 	data-lng="{{ image.lng or '' }}"
 	data-tags="{{ image.tags | join(',') if image.tags else '' }}">
 	<img src="{{ image.thumb }}"></img>
+	<span class="fav" data-id="{{ image.image_id }}" data-fav="{{ image.favourite }}">
+    		{{ '♥' if image.favourite else '♡' }}
+	</span>
 	<div class="date">
 		{{ image.timestamp.strftime('%Y-%m-%d') if image.timestamp else '' }}
 		{% if image.distance %}| {{ image.distance }}{% endif %}
@@ -148,7 +159,8 @@ form, form input, form button, form a {
 </div>
 <script>
 document.querySelectorAll('.grid-item').forEach(item => {
-    item.addEventListener('click', function() {
+    item.addEventListener('click', function(e) {
+	if (e.target.classList.contains('fav')) return;
         const display = this.dataset.display;
         const timestamp = this.dataset.timestamp;
         const lat = this.dataset.lat;
@@ -180,6 +192,21 @@ document.getElementById('lightbox').addEventListener('click', function(e) {
     if (e.target === this) {
         this.style.display = 'none';
     }
+});
+document.querySelectorAll('.fav').forEach(heart => {
+    heart.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const imageId = this.dataset.id;
+        fetch(`/favourite/${imageId}`, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const isFav = this.textContent.trim() === '♥';
+                    this.textContent = isFav ? '♡' : '♥';
+                    this.style.color = isFav ? '' : 'white';
+                }
+            });
+    });
 });
 </script>
 </body>
