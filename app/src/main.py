@@ -18,13 +18,13 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-def index(request: Request, q: str = None, show_cloud: str = None):
-    images, total = interpret_search(q, None)
+def index(request: Request, q: str = None, show_cloud: str = None, fav: str = None):
+    images, total = interpret_search(q, None, fav)
     label_cloud = get_labels_cloud()
     return templates.TemplateResponse(
             request=request,
             name="index.html",
-            context={"images": images, "total": total, "label_cloud": label_cloud}
+            context={"images": images, "total": total, "label_cloud": label_cloud, "fav": fav}
     )
 
 

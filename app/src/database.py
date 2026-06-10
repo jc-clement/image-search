@@ -100,7 +100,8 @@ def format_distance(metres):
     return f"{round(metres)}m"
 
 
-def get_images(year, month, day, lat, lng, labels, orderby):
+def get_images(year, month, day, lat, lng, labels, orderby, fav):
+    print(f"get_images called fav={fav}")
     conn = get_connection()
     cursor = conn.cursor()
     params = []
@@ -125,6 +126,9 @@ def get_images(year, month, day, lat, lng, labels, orderby):
     if day:
         conditions.append("EXTRACT(day FROM timestamp) = %s")
         params.append(day)
+
+    if fav:
+        conditions.append("favourite = TRUE")
 
     if lat and lng:
         count_conditions = conditions.copy()
@@ -166,7 +170,10 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                         'display': f"{filepath}/.display/{filename}",
                         'distance': format_distance(dist)
                     })
-                cursor.execute("SELECT COUNT(*) FROM images")
+                if fav:
+                    cursor.execute("SELECT COUNT(*) FROM images WHERE favourite = TRUE")
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM images")
                 total = cursor.fetchone()[0]
                 return images, total
             except psycopg2.Error as e:
@@ -205,7 +212,10 @@ def get_images(year, month, day, lat, lng, labels, orderby):
                 'display': f"{filepath}/.display/{filename}",
                 'distance': ''
             })
-        cursor.execute("SELECT COUNT(*) FROM images")
+        if fav:
+            cursor.execute("SELECT COUNT(*) FROM images WHERE favourite = TRUE")
+        else:
+            cursor.execute("SELECT COUNT(*) FROM images")
         total = cursor.fetchone()[0]
         return images, total
     except psycopg2.Error as e:

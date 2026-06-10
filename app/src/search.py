@@ -2,7 +2,7 @@ from database import get_images
 import re
 
 
-def interpret_search(search, order):
+def interpret_search(search, order, fav):
     # Interpret search string
 
     year, month, day = None, None, None
@@ -41,5 +41,5 @@ def interpret_search(search, order):
         if label_tokens:
             labels = label_tokens
 
-    images, total = get_images(year, month, day, lat, lng, labels, orderby)
+    images, total = get_images(year, month, day, lat, lng, labels, orderby, fav)
     return images, total

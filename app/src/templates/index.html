@@ -102,9 +102,10 @@ form, form input, form button, form a {
 		<p>Location: 54.2545,-0.9845 (within 5mi, or show nearest)</p>
 		<p>Combined: castle 2025-06 54.2545,-0.9845</p>
 	</details>
-    {% if request.query_params.get('q') %}
+    {% if request.query_params.get('q') or request.query_params.get('fav') %}
     <a href="/">X</a>&nbsp;
     {% endif %}
+    <input type="checkbox" name="fav" value="1" {% if request.query_params.get('fav') %}checked{% endif %}> Favourites only
     <input type="text" name="q" placeholder="Search images..." value="{{ request.query_params.get('q', '') }}">
     <button type="submit">Go</button>
     {% if request.query_params.get('q') %}
