@@ -84,12 +84,7 @@ form, form input, form button, form a {
     margin: 8px 0;
 }
 .fav {
-    position: absolute;
-    top: 0px;
-    right: 12px;
-    font-size: 2.5em;
     cursor: pointer;
-    text-shadow: 0 0 3px black;
 }
 </style>
 </head>
@@ -138,12 +133,13 @@ form, form input, form button, form a {
 	data-lng="{{ image.lng or '' }}"
 	data-tags="{{ image.tags | join(',') if image.tags else '' }}">
 	<img src="{{ image.thumb }}"></img>
+	<div class="date">
 	<span class="fav" data-id="{{ image.image_id }}" data-fav="{{ image.favourite }}">
     		{{ '♥' if image.favourite else '♡' }}
 	</span>
-	<div class="date">
 		{{ image.timestamp.strftime('%Y-%m-%d') if image.timestamp else '' }}
 		{% if image.distance %}| {{ image.distance }}{% endif %}
+		{% if image.lat %}📍{% endif %}
 	</div>
 </div>
 {% endfor %}

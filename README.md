@@ -34,7 +34,7 @@ See setup docs
 Interpreted search terms:
 - 'Things': castle, red car, elephant, sunset
 - Date: With increasing granularity - Year, or Year and Month, or Year and Month and Day
-- Location: lat,long (eg 54.0025,-0.1103), shows results within 5 miles **Location search requires decimal coords, place names are out of scope for V1**
+- Location: lat,long (eg 54.0025,-0.1103), shows results within 10 miles **Location search requires decimal coords, place names are out of scope for V1**
 
 Once results are returned, these can be sorted.
 

@@ -133,13 +133,13 @@ def get_images(year, month, day, lat, lng, labels, orderby, fav):
     if lat and lng:
         count_conditions = conditions.copy()
         count_params = params.copy()
-        count_conditions.append(f"{haversine} < 8045")
+        count_conditions.append(f"{haversine} < 16090")
         count_params.extend([lat, lng, lat])
-        count_where = "WHERE " + " AND ".join(count_conditions) if count_conditions else f"WHERE {haversine} < 8045"
+        count_where = "WHERE " + " AND ".join(count_conditions) if count_conditions else f"WHERE {haversine} < 16090"
         cursor.execute(f"SELECT COUNT(*) FROM images {count_where}", count_params)
         nearby_count = cursor.fetchone()[0]
         if nearby_count > 0:
-            conditions.append(f"{haversine} < 8045")
+            conditions.append(f"{haversine} < 16090")
             params.extend([lat, lng, lat])
         else:
             select_statement = f"""
