@@ -7,6 +7,7 @@ body {
 	font-family: sans-serif;
 	font-size: 1.3em;
 	color: white;
+	text-align: center;
 }
 a {
 	color: yellow;
@@ -77,11 +78,14 @@ a {
     text-align: center;
     padding: 8px;
 }
-form, form input, form button, form a {
+form, form input, form button, form a, button {
     font-family: sans-serif;
     font-size: 1.3em;
     text-align: center;
     margin: 8px 0;
+}
+button, details {
+    display: inline;
 }
 .fav {
     cursor: pointer;
@@ -89,7 +93,15 @@ form, form input, form button, form a {
 </style>
 </head>
 <body>
-<form action="/" method="get">
+    <form action="/" method="get">
+    {% if request.query_params.get('q') or request.query_params.get('fav') %}
+    <a href="/">X</a>&nbsp;
+    {% endif %}
+    <input type="text" name="q" placeholder="Search images..." value="{{ request.query_params.get('q', '') }}">
+    <button type="submit">Go</button>
+    <input type="checkbox" name="fav" value="1" {% if request.query_params.get('fav') %}checked{% endif %}> Favourites
+</form>
+<span>
 	<details>
 		<summary>Tips</summary>
 		<p>Labels: castle, red mushroom, beach</p>
@@ -98,17 +110,12 @@ form, form input, form button, form a {
 		<p>Combined: castle 2025-06 54.2545,-0.9845</p>
 	</details>
     {% if request.query_params.get('q') or request.query_params.get('fav') %}
-    <a href="/">X</a>&nbsp;
-    {% endif %}
-    <input type="checkbox" name="fav" value="1" {% if request.query_params.get('fav') %}checked{% endif %}> Favourites only
-    <input type="text" name="q" placeholder="Search images..." value="{{ request.query_params.get('q', '') }}">
-    <button type="submit">Go</button>
-    {% if request.query_params.get('q') %}
-    	({{ images|length }} / {{ total }})
+        ({{ images|length }} / {{ total }})
     {% else %}
-	({{ total }} images)
+        ({{ total }} images)
     {% endif %}
-</form>
+<button id="sort-toggle" onclick="toggleSort()">↓ Date</button>
+</span>
 {% if not request.query_params.get('q') %}
 <div class="labels">
     {% if not request.query_params.get('show_cloud') %}
@@ -205,6 +212,23 @@ document.querySelectorAll('.fav').forEach(heart => {
             });
     });
 });
+function sortImages(order) {
+    const grid = document.querySelector('.grid');
+    const items = Array.from(grid.querySelectorAll('.grid-item'));
+    items.sort((a, b) => {
+        const dateA = a.dataset.timestamp || '';
+        const dateB = b.dataset.timestamp || '';
+        return order === 'newest' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+    });
+    items.forEach(item => grid.appendChild(item));
+}
+let sortOrder = 'newest';
+
+function toggleSort() {
+    sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
+    sortImages(sortOrder);
+    document.getElementById('sort-toggle').textContent = sortOrder === 'newest' ? '↓ Date' : '↑ Date';
+}
 </script>
 </body>
 </html>
