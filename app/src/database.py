@@ -1,6 +1,9 @@
 import psycopg2
 import psycopg2.pool
 import os
+import redis
+from decimal import Decimal
+import json
 
 host = os.environ.get('POSTGRES_HOST')
 dbname = os.environ.get('POSTGRES_DB')
@@ -8,6 +11,7 @@ user = os.environ.get('POSTGRES_USER')
 password = os.environ.get('POSTGRES_PASSWORD')
 
 pool = None
+redis_client = None
 
 
 def init_pool():
@@ -101,7 +105,11 @@ def format_distance(metres):
 
 
 def get_images(year, month, day, lat, lng, labels, orderby, fav):
-    print(f"get_images called fav={fav}")
+    cache_key = f"search:{year}:{month}:{day}:{lat}:{lng}:{labels}:{orderby}:{fav}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        print(f"Cache hit: {cache_key}")
+        return json.loads(cached)
     conn = get_connection()
     cursor = conn.cursor()
     params = []
@@ -161,7 +169,7 @@ def get_images(year, month, day, lat, lng, labels, orderby, fav):
                         'image_id': image_id,
                         'filepath': filepath,
                         'filename': filename,
-                        'timestamp': timestamp,
+                        'timestamp': timestamp.strftime('%Y-%m-%d') if timestamp else '',
                         'lat': rlat,
                         'lng': rlng,
                         'tags': tags,
@@ -203,7 +211,7 @@ def get_images(year, month, day, lat, lng, labels, orderby, fav):
                 'image_id': image_id,
                 'filepath': filepath,
                 'filename': filename,
-                'timestamp': timestamp,
+                'timestamp': timestamp.strftime('%Y-%m-%d') if timestamp else '',
                 'lat': lat,
                 'lng': lng,
                 'tags': tags,
@@ -217,6 +225,7 @@ def get_images(year, month, day, lat, lng, labels, orderby, fav):
         else:
             cursor.execute("SELECT COUNT(*) FROM images")
         total = cursor.fetchone()[0]
+        redis_client.setex(cache_key, 3600, json.dumps([images, total], default=json_serialiser))
         return images, total
     except psycopg2.Error as e:
         print(f"DB query failed: {e}")
@@ -263,3 +272,26 @@ def toggle_fav(image_id):
         conn.rollback()
     finally:
         pool.putconn(conn)
+
+
+def init_redis():
+    global redis_client
+    try:
+        redis_client = redis.Redis(
+            host=os.environ.get('REDIS_HOST'),
+            port=6379,
+            decode_responses=True
+        )
+        redis_client.ping()
+        print("Redis connected successfully")
+    except redis.RedisError as e:
+        print(f"Redis connection failed: {e}")
+        exit(1)
+
+
+def json_serialiser(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError(f"Type {type(obj)} not serialisable")

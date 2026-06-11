@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-from database import init_pool, init_db, get_labels_cloud, toggle_fav
+from database import init_pool, init_db, init_redis, get_labels_cloud, toggle_fav
 from fastapi.templating import Jinja2Templates
 from search import interpret_search
 
@@ -10,6 +10,7 @@ async def lifespan(app: FastAPI):
     print("Starting FastAPI for Image-Search...")
     init_pool()
     init_db()
+    init_redis()
     yield
     # no shutdown cmds
 

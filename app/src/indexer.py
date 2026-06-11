@@ -1,5 +1,5 @@
 import os
-from database import get_indexed_files, save_image
+from database import get_indexed_files, save_image, init_redis, redis_client
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from datetime import datetime
@@ -130,6 +130,7 @@ def create_thumb(dir, file):
 if __name__ == "__main__":
     from database import init_pool
     init_pool()
+    init_redis()
     on_disk = scan_images()
     in_db = get_indexed_files()
     to_index = on_disk - in_db
@@ -159,3 +160,6 @@ if __name__ == "__main__":
             continue
         # Favourite check (Google takeout) - TODO
         save_image(directory, filename, timestamp, lat, lng, tags, False)
+
+    print("Flushing Redis cache")
+    redis_client.flushdb()

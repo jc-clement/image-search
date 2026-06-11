@@ -126,9 +126,9 @@ form, form input, form button, form a {
 <div class="grid-item"
 	data-display="{{ image.display }}"
 	data-timestamp="{{ image.timestamp or '' }}"
-	data-year="{{ image.timestamp.year if image.timestamp else '' }}"
-	data-month="{{ image.timestamp.month if image.timestamp else '' }}"
-	data-day="{{ image.timestamp.day if image.timestamp else '' }}"
+	data-year="{{ image.timestamp[:4] if image.timestamp else '' }}"
+	data-month="{{ image.timestamp[5:7] if image.timestamp else '' }}"
+	data-day="{{ image.timestamp[8:10] if image.timestamp else '' }}"
 	data-lat="{{ image.lat or '' }}"
 	data-lng="{{ image.lng or '' }}"
 	data-tags="{{ image.tags | join(',') if image.tags else '' }}">
@@ -137,7 +137,7 @@ form, form input, form button, form a {
 	<span class="fav" data-id="{{ image.image_id }}" data-fav="{{ image.favourite }}">
     		{{ '♥' if image.favourite else '♡' }}
 	</span>
-		{{ image.timestamp.strftime('%Y-%m-%d') if image.timestamp else '' }}
+		{{ image.timestamp }}
 		{% if image.distance %}| {{ image.distance }}{% endif %}
 		{% if image.lat %}📍{% endif %}
 	</div>
